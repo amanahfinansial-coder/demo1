@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Cita-Citaku: Dokter Cilik</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff;
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            border: 6px solid #38bdf8;
+            border-radius: 35px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 1100px;
+            min-height: calc(100vh - 60px); /* Mengisi tinggi layar dengan menyisakan sedikit margin biru */
+            padding: 25px 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Menyebarkan elemen secara seimbang dari atas ke bawah */
+            align-items: center;
+        }
+
+        h1 {
+            font-family: 'Comfortaa', cursive;
+            color: #0284c7;
+            font-size: clamp(22px, 3.8vw, 32px);
+            margin: 0 0 10px 0;
+        }
+
+        .screen { 
+            display: none; 
+            width: 100%; 
+            height: 100%;
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between; 
+            flex-grow: 1;
+        }
+        
+        .screen.active { 
+            display: flex; 
+        }
+
+        /* Video diperbesar agar proporsional dengan tinggi kontainer */
+        .video-box {
+            width: 100%;
+            max-width: 800px;
+            flex-grow: 1; /* Membiarkan kotak video mengisi ruang kosong */
+            max-height: 55vh; /* Membuat video lebih tinggi */
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid #0284c7;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            margin: 10px 0;
+        }
+
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+
+        .caption-box {
+            width: 100%;
+            max-width: 800px;
+            background: #f0f9ff;
+            border: 3px solid #0284c7;
+            border-radius: 18px;
+            padding: 12px 20px;
+            margin-top: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .caption-text {
+            font-size: clamp(16px, 2.2vw, 20px);
+            color: #0369a1;
+            font-weight: bold;
+            font-family: 'Comfortaa', cursive;
+            margin: 0;
+        }
+
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin: auto 0;
+        }
+
+        .quiz-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 15px;
+            border: 4px solid #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 #e2e8f0;
+        }
+
+        .quiz-card:hover {
+            transform: scale(1.02);
+            background: #e0f2fe;
+            border-color: #0284c7;
+        }
+
+        .quiz-card video {
+            width: 100%;
+            height: 160px;
+            border-radius: 12px;
+            pointer-events: none;
+            object-fit: cover;
+        }
+
+        .quiz-card p {
+            font-size: clamp(16px, 2.5vw, 20px);
+            font-weight: bold;
+            margin: 10px 0 0 0;
+            font-family: 'Comfortaa', cursive;
+            color: #0f172a;
+        }
+
+        .btn-start {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: clamp(18px, 2.8vw, 24px);
+            font-family: 'Comfortaa', cursive;
+            border-radius: 22px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #15803d;
+            margin-top: 15px;
+        }
+
+        .btn-start:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #15803d;
+        }
+
+        .status-text {
+            font-size: clamp(16px, 2.2vw, 20px);
+            color: #475569;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            margin-top: 10px;
+            color: #0284c7;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="screenStart" class="screen active">
+            <h1>🩺 Petualangan Cita-Citaku: Dokter Cilik 🏥</h1>
+            <p class="status-text">Mari tonton video materi dokter bersama-sama sebelum kuis!</p>
+            <div>
+                <button class="btn-start" onclick="startLearning()">MULAI BELAJAR! ▶️</button>
+            </div>
+        </div>
+
+        <div id="screenLearn" class="screen">
+            <h1 id="learnTitle">Menonton Materi Pembelajaran...</h1>
+            <div class="video-box">
+                <video id="mainVideo">
+                    <source id="videoSource" src="" type="video/mp4">
+                </video>
+            </div>
+            <div class="caption-box">
+                <p class="caption-text" id="captionText">Memuat teks...</p>
+            </div>
+            <div class="progress-bar" id="progressText">Materi 1 dari 5</div>
+        </div>
+
+        <div id="screenQuiz1" class="screen">
+            <h1>Pertanyaan 1: Manakah alat yang digunakan Dokter untuk memeriksa detak jantung?</h1>
+            <div class="quiz-grid">
+                <div class="quiz-card" onclick="checkAnswer(true, 1)">
+                    <video src="Dokter 2.mp4" muted loop autoplay></video>
+                    <p>🩺 Stetoskop</p>
+                </div>
+                <div class="quiz-card" onclick="checkAnswer(false, 1)">
+                    <video src="Dokter 4.mp4" muted loop autoplay></video>
+                    <p>✂️ Gunting Kertas</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="screenQuiz2" class="screen">
+            <h1>Pertanyaan 2: Di manakah tempat Dokter bekerja menolong orang sakit?</h1>
+            <div class="quiz-grid">
+                <div class="quiz-card" onclick="checkAnswer(true, 2)">
+                    <video src="Dokter 3.mp4" muted loop autoplay></video>
+                    <p>🏥 Rumah Sakit</p>
+                </div>
+                <div class="quiz-card" onclick="checkAnswer(false, 2)">
+                    <video src="Dokter 1.mp4" muted loop autoplay></video>
+                    <p>🎡 Pasar Malam</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="screenQuiz3" class="screen">
+            <h1>Pertanyaan 3: Agar badan sehat seperti anjuran dokter, makanan apa yang harus kita makan?</h1>
+            <div class="quiz-grid">
+                <div class="quiz-card" onclick="checkAnswer(true, 3)">
+                    <video src="Dokter 4.mp4" muted loop autoplay></video>
+                    <p>🥦🍎 Sayur & Buah Segar</p>
+                </div>
+                <div class="quiz-card" onclick="checkAnswer(false, 3)">
+                    <video src="Dokter 2.mp4" muted loop autoplay></video>
+                    <p>🍬 Permen Berlebihan</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="screenReaction" class="screen">
+            <h1 id="reactionTitle">Hebat!</h1>
+            <div class="video-box">
+                <video id="reactionVideo" autoplay></video>
+            </div>
+            <div id="reactionButtonContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const materialData = [
+            { file: "Dokter 1.mp4", text: "👨‍⚕️ Halo teman-teman! Hari ini kita berkenalan dengan profesi mulia menjadi seorang Dokter!" },
+            { file: "Dokter 2.mp4", text: "🩺 Ini stetoskop! Alat ajaib untuk mendengarkan detak jantung." },
+            { file: "Dokter 3.mp4", text: "🏥 Dokter bekerja di klinik atau rumah sakit untuk merawat orang sakit agar ceria kembali." },
+            { file: "Dokter 4.mp4", text: "🍎 Agar tubuh sehat dan jarang ke dokter, kita harus makan makanan bergizi dan buah segar!" },
+            { file: "Dokter 5.mp4", text: "🌟 Hebat sekali! Siapa di sini yang kelak ingin menjadi dokter hebat?" }
+        ];
+        
+        let currentMaterialIdx = 0;
+        const mainVideo = document.getElementById('mainVideo');
+        const videoSource = document.getElementById('videoSource');
+        const progressText = document.getElementById('progressText');
+        const captionText = document.getElementById('captionText');
+
+        function startLearning() {
+            showScreen('screenLearn');
+            playMaterial();
+        }
+
+        function playMaterial() {
+            if (currentMaterialIdx < materialData.length) {
+                videoSource.src = materialData[currentMaterialIdx].file;
+                captionText.innerText = materialData[currentMaterialIdx].text;
+                progressText.innerText = `Materi ${currentMaterialIdx + 1} dari 5`;
+                mainVideo.load();
+                mainVideo.play();
+            } else {
+                showScreen('screenQuiz1');
+            }
+        }
+
+        mainVideo.onended = function() {
+            currentMaterialIdx++;
+            playMaterial();
+        };
+
+        function checkAnswer(isCorrect, currentQuizNum) {
+            showScreen('screenReaction');
+            const reactionVideo = document.getElementById('reactionVideo');
+            const reactionTitle = document.getElementById('reactionTitle');
+            const btnContainer = document.getElementById('reactionButtonContainer');
+            
+            btnContainer.innerHTML = "";
+
+            if (isCorrect) {
+                reactionTitle.innerText = "HORE! JAWABANMU BENAR! 🎉";
+                reactionTitle.style.color = "#16a34a";
+                reactionVideo.src = "Dokter 6.mp4";
+                
+                let nextTarget = (currentQuizNum < 3) ? `screenQuiz${currentQuizNum + 1}` : 'screenStart';
+                let btnText = (currentQuizNum < 3) ? "Pertanyaan Berikutnya ➡️" : "Selesai & Ulangi 🔄";
+                
+                btnContainer.innerHTML = `<button class="btn-start" onclick="resetState('${nextTarget}')">${btnText}</button>`;
+            } else {
+                reactionTitle.innerText = "HAMPIR BENAR! AYO COBA LAGI! 😊";
+                reactionTitle.style.color = "#dc2626";
+                reactionVideo.src = "Dokter 7.mp4";
+                
+                btnContainer.innerHTML = `<button class="btn-start" style="background:#ef4444; box-shadow: 0 6px 0 #991b1b;" onclick="showScreen('screenQuiz${currentQuizNum}')">Coba Lagi 🔁</button>`;
+            }
+            reactionVideo.load();
+            reactionVideo.play();
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function resetState(target) {
+            if (target === 'screenStart') {
+                currentMaterialIdx = 0;
+            }
+            showScreen(target);
+        }
+    </script>
+</body>
+</html>
